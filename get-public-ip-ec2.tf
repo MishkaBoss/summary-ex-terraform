@@ -53,7 +53,27 @@ resource "aws_instance" "summary-ex-instance" {
   tags = {
     Name = "summary-ex-instance"
   }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt-get update -y",
+      "sudo apt-get install docker.io -y",
+      "sudo systemctl start docker",
+      "sudo systemctl enable docker",
+      "sudo usermod -aG docker ubuntu",
+      "sudo docker pull devoops93/todo-app:latest",  # Replace with your Docker image
+      "sudo docker run -d devoops93/todo-app:latest" # Replace with your Docker image
+    ]
+
+    connection {
+      type        = "ssh"
+      user        = "ec2-user"
+      private_key = file("~/.ssh/id_rsa") # Replace with the path to your private key
+      host        = self.public_ip
+    }
+  }
 }
+
+
 
 output "public_ip" {
   value = aws_instance.summary-ex-instance.public_ip
